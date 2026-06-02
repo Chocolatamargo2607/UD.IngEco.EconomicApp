@@ -18,4 +18,8 @@
     <None Remove="wwwroot\NewFolder\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Remove="wwwroot\css\InteresCompuesto.razor" />
+  </ItemGroup>
+
 </Project>
