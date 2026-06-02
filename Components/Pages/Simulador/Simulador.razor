@@ -1,0 +1,150 @@
+@page "/simulador"
+@rendermode InteractiveServer
+@inject ITasaService TasaService
+@inject IAmortizacionService AmortizacionService
+@inject IReporteService ReporteService
+@inject IJSRuntime JS
+@using EconomicApp.Components.Shared.Simulador
+
+<div class="animate-fadeIn max-w-7xl mx-auto px-2 sm:px-4 py-4">
+    <div class="mb-6">
+        <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-white flex items-center gap-2 mb-2">
+            <i class="bi bi-calculator text-emerald-500"></i>
+            Simulador de Créditos
+        </h2>
+        <p class="text-slate-400 text-xs sm:text-sm">Modele préstamos, convierta tasas y genere tablas de amortización detalladas.</p>
+    </div>
+
+    <div class="space-y-4 gap-3">
+        
+        <EditForm Model="@simulacion" OnValidSubmit="SimularCredito" OnInvalidSubmit="SimulacionInvalida">
+            <DataAnnotationsValidator />
+            <SimuladorDatosCredito Simulacion="@simulacion" />
+        
+            <SimuladorTasaInteres Simulacion="@simulacion" />
+        
+            <SimuladorConfigAmortizacion Amortizacion="@amortizacion" />
+            <button type="submit" class="btn-emerald w-full py-3 mt-2 flex items-center justify-center gap-2 font-semibold">
+                <i class="bi bi-play-fill"></i>
+                Simular Crédito
+            </button>
+        </EditForm>
+    </div>
+
+    <div class="mt-4">
+        <SimuladorTasaAlert ConversionTasa="@conversionTasa" />
+    </div>
+
+    @if (resultadoAmortizacion != null)
+    {
+        <div class="mt-8 space-y-6 animate-fadeIn">
+            <SimuladorResumen Resultado="@resultadoAmortizacion" Monto="@simulacion.MontoPrestamo" />
+            <SimuladorFlujoCaja Cuotas="@resultadoAmortizacion.TablaAmortizacion" MontoPrestamo="@simulacion.MontoPrestamo" />
+            <SimuladorTabla Cuotas="@resultadoAmortizacion.TablaAmortizacion" OnExport="Exportar"  OnRecalcular="RecalcularTabla" />
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(mensajeError))
+    {
+        <div class="alert-danger mt-4 flex items-center gap-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            @mensajeError
+        </div>
+    }
+</div>
+
+@code {
+    private SimulacionRequestDto simulacion = new() 
+    { 
+        FrecuenciaPago = Frecuencia.Mensual, 
+        FrecuenciaTasa = Frecuencia.Anual
+    };
+    private AmortizacionRequestDto amortizacion = new() { SistemaAmortizacion = SistemaAmortizacion.Frances };
+    private ConversionTasaResponseDto? conversionTasa;
+    private AmortizacionResponseDto? resultadoAmortizacion;
+    private string mensajeError = string.Empty;
+
+    private void SimulacionInvalida()
+    {
+        mensajeError = "Por favor, corrija los errores en el formulario antes de simular.";
+        conversionTasa = null;
+        resultadoAmortizacion = null;
+    }
+
+    private void SimularCredito()
+    {
+        mensajeError = string.Empty;
+        conversionTasa = null;
+        resultadoAmortizacion = null;
+        StateHasChanged();
+        try
+        {
+            conversionTasa = TasaService.CalcularTasaPeriodica(simulacion);
+            if (!conversionTasa.EsExitoso)
+            {
+                mensajeError = conversionTasa.Mensaje;
+                return;
+            }
+
+            amortizacion.Capital = simulacion.MontoPrestamo;
+            amortizacion.Plazo = simulacion.Plazo;
+            amortizacion.TasaEfectivaPeriodica = conversionTasa.TasaEfectivaPeriodica;
+
+            resultadoAmortizacion = AmortizacionService.GenerarTabla(amortizacion);
+        }
+        catch (Exception ex)
+        {
+            mensajeError = $"Error al simular: {ex.Message}";
+        }
+    }
+
+    private async Task Exportar(FormatoExportacion formato)
+    {
+        if (resultadoAmortizacion == null || conversionTasa == null) return;
+
+        try
+        {
+            byte[] archivo;
+            string extension;
+
+            if (formato == FormatoExportacion.Excel)
+            {
+                archivo = ReporteService.GenerarReporteExcel(resultadoAmortizacion, simulacion);
+                extension = "csv";
+            }
+            else
+            {
+                archivo = ReporteService.GenerarReportePdf(resultadoAmortizacion, simulacion);
+                extension = "txt";
+            }
+
+            var nombreArchivo = $"reporte_credito_{DateTime.Now:yyyyMMddHHmmss}.{extension}";
+            await JS.InvokeVoidAsync("downloadFileFromBytes", nombreArchivo, archivo);
+        }
+        catch (Exception ex)
+        {
+            mensajeError = $"Error al exportar: {ex.Message}";
+        }
+    }
+    private async Task RecalcularTabla(RecalculoRequestDto request)
+    {
+        if (resultadoAmortizacion == null)
+            return;
+            
+        var resultado = AmortizacionService.RecalcularDesdePeriodo(
+        resultadoAmortizacion.TablaAmortizacion,
+        request.Periodo,
+        request.ValorAbono,
+        request.Tipo,
+        amortizacion.TasaEfectivaPeriodica,
+        amortizacion.SistemaAmortizacion);
+
+        resultadoAmortizacion = new AmortizacionResponseDto{
+            TablaAmortizacion = resultado.TablaAmortizacion,
+            TotalInteresesPagados = resultado.TotalInteresesPagados,
+            TotalPagado = resultado.TotalPagado
+        };
+
+        await InvokeAsync(StateHasChanged);
+    }
+}

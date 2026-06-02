@@ -2,133 +2,122 @@
 @using System.Globalization
 @rendermode InteractiveServer
 
-<div class="animate-fadeIn">
-    <!-- Encabezado -->
-    <div class="d-flex align-items-center mb-4">
-        <a href="razones" class="btn btn-outline-secondary btn-sm me-3">
+<div class="animate-fadeIn max-w-7xl mx-auto">
+    <div class="flex items-center gap-4 mb-6">
+        <a href="razones" class="flex items-center gap-2 text-slate-400 hover:text-emerald-500 transition-colors">
             <i class="bi bi-arrow-left"></i> Volver al Menú
         </a>
-        <h3 class="text-emerald fw-bold mb-0">Método 3: Partes Alícuotas</h3>
+        <h3 class="text-emerald-500 font-bold text-xl mb-0">Método 3: Partes Alícuotas</h3>
     </div>
 
-    <div class="row">
-        <!-- Panel de Configuración -->
-        <div class="col-lg-4">
-            <div class="content-card mb-4">
-                <h4 class="mb-4 text-white"><i class="bi bi-input-cursor-text me-2"></i>Entrada de Datos</h4>
-
-                <div class="form-group mb-4">
-                    <label class="text-muted small fw-bold">CANTIDAD A REPARTIR (COP)</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-dark border-secondary text-emerald">$</span>
-                        <input type="number" class="form-control" @bind="montoTotal" @bind:event="oninput" />
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div class="lg:col-span-1 space-y-6">
+            <div class="card-dark">
+                <h4 class="text-white font-semibold mb-4 flex items-center gap-2">
+                    <i class="bi bi-input-cursor-text text-emerald-500"></i>
+                    Entrada de Datos
+                </h4>
+                <div class="mb-4">
+                    <label class="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Cantidad a Repartir (COP)</label>
+                    <div class="flex">
+                        <span class="input-dark rounded-r-none px-3 flex items-center bg-slate-800 border-r border-slate-700 text-emerald-500">$</span>
+                        <input type="number" class="input-dark rounded-l-none" @bind="montoTotal" @bind:event="oninput" placeholder="Ej: 450000" />
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <label class="text-muted small fw-bold">ÍNDICES DE REPARTO</label>
-                    <button class="btn btn-sm btn-outline-emerald" @onclick="AgregarIndividuo">
+                <div class="flex justify-between items-center mb-3">
+                    <label class="text-slate-400 text-xs font-bold uppercase tracking-wider">Índices de Reparto</label>
+                    <button class="bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-lg text-sm font-semibold hover:bg-emerald-500/20 transition-colors flex items-center gap-1" @onclick="AgregarIndividuo">
                         <i class="bi bi-plus-lg"></i> Añadir
                     </button>
                 </div>
 
-                <div class="scroll-area">
+                <div class="max-h-64 overflow-y-auto pr-2 space-y-2">
                     @for (int i = 0; i < individuos.Count; i++)
                     {
                         var index = i;
-                        <div class="individuo-item mb-2 animate-fadeIn">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-dark border-secondary text-muted">ID</span>
-                                <input type="text" class="form-control w-50" @bind="individuos[index].Nombre" placeholder="Nombre" />
-                                <input type="number" class="form-control" @bind="individuos[index].Indice" @bind:event="oninput" placeholder="Índice" />
-                                <button class="btn btn-outline-danger border-secondary" @onclick="() => EliminarIndividuo(index)">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
+                        <div class="flex gap-2 animate-fadeIn">
+                            <span class="input-dark rounded-r-none px-2 flex items-center bg-slate-800 border-r border-slate-700 text-slate-500 text-sm">ID</span>
+                            <input type="text" class="input-dark w-1/2" @bind="individuos[index].Nombre" placeholder="Nombre" />
+                            <input type="number" class="input-dark" @bind="individuos[index].Indice" @bind:event="oninput" placeholder="Índice" />
+                            <button class="bg-red-500/10 text-red-500 px-3 rounded-lg hover:bg-red-500/20 transition-colors" @onclick="() => EliminarIndividuo(index)">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </div>
                     }
                 </div>
             </div>
 
-            <!-- Panel de Fórmulas -->
-            <div class="content-card formula-display">
-                <h5 class="text-emerald mb-4 text-center border-bottom border-secondary pb-2">Formulas Implementadas</h5>
-
-                <!-- Base -->
-                <div class="math-container mb-3">
-                    <div class="math-label text-muted">1. Sujeto Base (Menor Índice):</div>
-                    <div class="math-formula">
-                        <span class="var">C<sub>base</sub></span> =
-                        <div class="fraction">
-                            <span class="num">Índice<sub>base</sub></span>
-                            <span class="den">Σ Índices</span>
+            <div class="card-dark border-l-4 border-l-emerald-500">
+                <h5 class="text-emerald-500 font-semibold mb-4 text-center">Formulas Implementadas</h5>
+                <div class="space-y-4">
+                    <div>
+                        <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">1. Sujeto Base (Menor Índice):</div>
+                        <div class="bg-slate-800/50 p-3 rounded-lg font-mono text-sm">
+                            <span class="text-emerald-500">C<sub>base</sub></span> = (Índice<sub>base</sub> / Σ Índices) × Monto
                         </div>
-                        × <span class="var">Monto</span>
                     </div>
-                </div>
-
-                <!-- Progresión -->
-                <div class="math-container">
-                    <div class="math-label text-muted">2. Sujetos Siguientes:</div>
-                    <div class="math-formula">
-                        <span class="var">C<sub>n</sub></span> =
-                        <span class="var">C<sub>n-1</sub></span> +
-                        <div class="fraction">
-                            <span class="num">C<sub>n-1</sub></span>
-                            <span class="den">2</span>
+                    <div>
+                        <div class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">2. Sujetos Siguientes:</div>
+                        <div class="bg-slate-800/50 p-3 rounded-lg font-mono text-sm">
+                            <span class="text-emerald-500">Cn</span> = C<sub>n-1</sub> + (C<sub>n-1</sub> / 2)
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Resultados -->
-        <div class="col-lg-8">
-            <div class="content-card h-100">
-                <h4 class="mb-4 text-white"><i class="bi bi-cpu me-2"></i>Análisis de Resultados</h4>
+        <div class="lg:col-span-3">
+            <div class="card-dark h-full">
+                <h4 class="text-white font-semibold mb-4 flex items-center gap-2">
+                    <i class="bi bi-cpu text-emerald-500"></i>
+                    Análisis de Resultados
+                </h4>
 
                 @if (SumaIndices > 0)
                 {
                     var resultados = CalcularDistribucion();
 
-                    <div class="table-responsive">
-                        <table class="table table-dark custom-table">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
                             <thead>
-                                <tr>
-                                    <th class="ps-4">Orden</th>
-                                    <th>Sujeto</th>
-                                    <th class="text-center">Índice</th>
-                                    <th class="text-center">Ecuación Aplicada</th>
-                                    <th class="text-end pe-4">Monto Asignado</th>
+                                <tr class="border-b border-slate-700">
+                                    <th class="text-left py-3 px-4 text-slate-400 text-xs uppercase tracking-wider">Orden</th>
+                                    <th class="text-left py-3 px-4 text-slate-400 text-xs uppercase tracking-wider">Sujeto</th>
+                                    <th class="text-center py-3 px-4 text-slate-400 text-xs uppercase tracking-wider">Índice</th>
+                                    <th class="text-center py-3 px-4 text-slate-400 text-xs uppercase tracking-wider">Método</th>
+                                    <th class="text-right py-3 px-4 text-slate-400 text-xs uppercase tracking-wider">Monto Asignado</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var item in resultados)
                                 {
-                                    <tr class="@(item.EsBase ? "bg-emerald-faded" : "")">
-                                        <td class="ps-4 text-muted">#@(resultados.IndexOf(item) + 1)</td>
-                                        <td class="fw-bold">@item.Nombre</td>
-                                        <td class="text-center"><span class="badge bg-secondary">@item.Indice</span></td>
-                                        <td class="text-center">
+                                    <tr class="border-b border-slate-700/50 hover:bg-emerald-500/5 transition-colors @(item.EsBase ? "bg-emerald-500/5" : "")">
+                                        <td class="py-3 px-4 text-slate-500">#@(resultados.IndexOf(item) + 1)</td>
+                                        <td class="py-3 px-4 font-bold">@item.Nombre</td>
+                                        <td class="py-3 px-4 text-center">
+                                            <span class="bg-slate-700 px-2 py-1 rounded text-sm">@item.Indice</span>
+                                        </td>
+                                        <td class="py-3 px-4 text-center">
                                             @if (item.EsBase)
                                             {
-                                                <small class="badge bg-emerald-outline">Cálculo Base (Mínimo)</small>
+                                                <span class="bg-emerald-500/20 text-emerald-500 px-2 py-1 rounded text-xs">Base (Mínimo)</span>
                                             }
                                             else
                                             {
-                                                <small class="text-muted">Anterior + 50%</small>
+                                                <span class="text-slate-500 text-sm">Anterior + 50%</span>
                                             }
                                         </td>
-                                        <td class="text-end pe-4 fw-bold text-emerald">
+                                        <td class="py-3 px-4 text-right font-bold text-emerald-500">
                                             @item.MontoAsignado.ToString("C0", cultureCOP)
                                         </td>
                                     </tr>
                                 }
                             </tbody>
-                            <tfoot class="bg-darker">
-                                <tr>
-                                    <td colspan="4" class="text-end fw-bold text-muted">Total Proyectado:</td>
-                                    <td class="text-end pe-4 fw-bold text-emerald border-top border-emerald fs-5">
+                            <tfoot>
+                                <tr class="bg-slate-800/50">
+                                    <td colspan="4" class="py-3 px-4 text-right font-bold text-slate-400 uppercase tracking-wider">Total Proyectado:</td>
+                                    <td class="py-3 px-4 text-right font-bold text-emerald-500 text-lg border-t border-emerald-500">
                                         @resultados.Sum(x => x.MontoAsignado).ToString("C0", cultureCOP)
                                     </td>
                                 </tr>
@@ -136,26 +125,26 @@
                         </table>
                     </div>
 
-                    <div class="alert alert-info mt-4 bg-dark border-secondary text-muted">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <strong>Nota:</strong> Este método es acumulativo. El total puede exceder o ser inferior al monto inicial dependiendo de la cantidad de sujetos y sus proporciones.
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 mt-4 flex items-start gap-3">
+                        <i class="bi bi-info-circle text-emerald-500 mt-0.5"></i>
+                        <p class="text-slate-400 text-sm">
+                            <strong class="text-white">Nota:</strong> Este método es acumulativo. El total puede exceder o ser inferior al monto inicial dependiendo de la cantidad de sujetos y sus proporciones.
+                        </p>
                     </div>
                 }
                 else
                 {
-                    <div class="empty-state">
-                        <div class="empty-icon-circle">
-                            <i class="bi bi-calculator"></i>
+                    <div class="text-center py-16">
+                        <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="bi bi-calculator text-3xl text-slate-600"></i>
                         </div>
-                        <h5 class="text-white">Esperando datos...</h5>
-                        <p>Ingrese los valores para proceder con el cálculo.</p>
+                        <h5 class="text-white font-semibold mb-2">Esperando datos...</h5>
+                        <p class="text-slate-500">Ingrese los valores para proceder con el cálculo.</p>
                     </div>
                 }
             </div>
         </div>
     </div>
-
-
 </div>
 
 @code {
@@ -163,11 +152,11 @@
     private CultureInfo cultureCOP = new CultureInfo("es-CO");
 
     private List<Individuo> individuos = new()
-{
-    new Individuo { Nombre = "Sujeto 1", Indice = 0 },
-    new Individuo { Nombre = "Sujeto 2", Indice = 0 },
-    new Individuo { Nombre = "Sujeto 3", Indice = 0 }
-};
+    {
+        new Individuo { Nombre = "Sujeto 1", Indice = 0 },
+        new Individuo { Nombre = "Sujeto 2", Indice = 0 },
+        new Individuo { Nombre = "Sujeto 3", Indice = 0 }
+    };
 
     public class Individuo { public string Nombre { get; set; } = ""; public double Indice { get; set; } }
     public class ResultadoItem
@@ -194,7 +183,7 @@
             var actual = listaOrdenada[i];
             double cocienteActual = 0;
 
-            if (i == 0) // El primero (Sujeto Base con menor índice)
+            if (i == 0)
             {
                 cocienteActual = (actual.Indice / SumaIndices) * montoTotal;
                 resultados.Add(new ResultadoItem
@@ -205,7 +194,7 @@
                     EsBase = true
                 });
             }
-            else // Los siguientes (Anterior + 50%)
+            else
             {
                 cocienteActual = ultimoCociente + (ultimoCociente / 2);
                 resultados.Add(new ResultadoItem
@@ -220,6 +209,4 @@
         }
         return resultados;
     }
-
-
 }

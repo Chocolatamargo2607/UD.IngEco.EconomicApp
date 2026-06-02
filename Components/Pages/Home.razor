@@ -1,31 +1,159 @@
 ﻿@page "/"
 
-<div class="welcome-container">
-    <div class="hero-card">
-        <h1 class="display-4 fw-bold">Bienvenido al Portal de <span class="text-emerald">Ingeniería Económica</span></h1>
-        <p class="lead text-muted">Automatiza tus cálculos financieros con precisión profesional.</p>
-    </div>
-
-    <div class="modules-grid">
-        <div class="m-card">
-            <i class="bi bi-arrow-left-right"></i>
-            <h3>Razones y Proporciones</h3>
-            <p>Análisis de relaciones numéricas y comparativas.</p>
-            <a href="razones" class="btn-module">Abrir Módulo</a>
+<div class="animate-fadeIn">
+    <div class="max-w-6xl mx-auto py-4 sm:py-8 px-2 sm:px-4">
+        <div class="text-center mb-10 sm:mb-16">
+            <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-emerald-500/10 rounded-full mb-4 sm:mb-6">
+                <i class="bi bi-graph-up text-3xl sm:text-4xl text-emerald-500"></i>
+            </div>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 px-2">
+                Bienvenido a <span class="text-emerald-500">EconomicApp</span>
+            </h1>
+            <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto px-4">
+                Simulador de Crédito Académico para la asignatura de Ingeniería Económica. 
+                Modela préstamos, convierte tasas, calcula amortizaciones y exporta reportes.
+            </p>
         </div>
 
-        <div class="m-card">
-            <i class="bi bi-percent"></i>
-            <h3>Interés Simple</h3>
-            <p>Cálculo de rendimientos sobre capital inicial.</p>
-            <a href="interes-simple" class="btn-module">Calcular</a>
+        <div class="bg-slate-800 rounded-2xl p-6 sm:p-8 mb-10 border border-slate-700 shadow-xl">
+            <h2 class="text-lg sm:text-xl font-semibold text-emerald-500 mb-6 flex items-center gap-2">
+                <i class="bi bi-info-circle"></i>
+                ¿Qué puedes hacer con esta aplicación?
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-slate-300">
+                <div class="space-y-6">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="bi bi-calculator text-emerald-500"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white mb-1 text-base">Simulador de Créditos</h3>
+                            <p class="text-sm text-slate-400">Modela préstamos con diferentes sistemas de amortización (Francés y Alemán),Periodos de gracia y exportación de reportes.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="bi bi-arrow-left-right text-emerald-500"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white mb-1">Razones y Proporciones</h3>
+                            <p class="text-sm text-slate-400">Distribución proporcional de montos según índices de participación.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="bi bi-currency-exchange text-emerald-500"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white mb-1">Conversión de Tasas</h3>
+                            <p class="text-sm text-slate-400">Convierte tasas nominales a efectivas y calcula tasas equivalentes para diferentes períodos.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="bi bi-file-earmark-arrow-down text-emerald-500"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-white mb-1">Reportes Exportables</h3>
+                            <p class="text-sm text-slate-400">Genera reportes detallados en PDF o Excel con tablas de amortización completas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="m-card">
-            <i class="bi bi-piggy-bank"></i>
-            <h3>Interés Compuesto</h3>
-            <p>Efecto de la capitalización en el tiempo.</p>
-            <a href="interes-compuesto" class="btn-module">Simular</a>
+        <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 mb-10">
+            <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <i class="bi bi-lightning-fill text-yellow-500"></i>
+                Funcionalidades Pedagógicas
+            </h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+                    <div class="text-emerald-500 font-bold mb-2">Enfoque Transparente</div>
+                    <p class="text-sm text-slate-400">A diferencia de las "cajas negras" comerciales, aquí ves exactamente cómo se calculan los intereses.</p>
+                </div>
+                <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+                    <div class="text-emerald-500 font-bold mb-2">Comparativa Instantánea</div>
+                    <p class="text-sm text-slate-400">Cambia entre sistemas Francés y Alemán para ver cómo varía el costo financiero.</p>
+                </div>
+                <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+                    <div class="text-emerald-500 font-bold mb-2">Precisión Matemática</div>
+                    <p class="text-sm text-slate-400">Cálculos con 6 decimales de precisión para garantizar saldos finales exactos.</p>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+            <i class="bi bi-grid-3x3-gap text-emerald-500"></i>
+            Módulos Disponibles
+        </h2>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <a href="/simulador" class="group bg-slate-800 border border-slate-700 rounded-2xl p-6 hover:border-emerald-500 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-14 h-14 bg-emerald-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-500/20 transition-colors">
+                    <i class="bi bi-calculator text-2xl text-emerald-500"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Simulador de Créditos</h3>
+                <p class="text-slate-400 text-sm mb-4">Modela préstamos, tasas y sistemas de amortización.</p>
+                <span class="inline-flex items-center gap-2 text-emerald-500 text-sm font-semibold">
+                    Abrir módulo <i class="bi bi-arrow-right"></i>
+                </span>
+            </a>
+
+            <a href="/razones" class="group bg-slate-800 border border-slate-700 rounded-2xl p-6 hover:border-emerald-500 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-14 h-14 bg-emerald-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-500/20 transition-colors">
+                    <i class="bi bi-arrow-left-right text-2xl text-emerald-500"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Razones y Proporciones</h3>
+                <p class="text-slate-400 text-sm mb-4">Análisis de relaciones numéricas y comparativas.</p>
+                <span class="inline-flex items-center gap-2 text-emerald-500 text-sm font-semibold">
+                    Abrir módulo <i class="bi bi-arrow-right"></i>
+                </span>
+            </a>
+
+            <a href="/interes-compuesto" class="group bg-slate-800 border border-slate-700 rounded-2xl p-6 hover:border-emerald-500 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-14 h-14 bg-emerald-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-500/20 transition-colors">
+                    <i class="bi bi-activity text-2xl text-emerald-500"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Interes Compuesto</h3>
+                <p class="text-slate-400 text-sm mb-4">Calculo del crecimiento del dinero a través de la capitalización periódica.</p>
+                <span class="inline-flex items-center gap-2 text-emerald-500 text-sm font-semibold">
+                    Abrir módulo <i class="bi bi-arrow-right"></i>
+                </span>
+            </a>
+
+            <a href="/anualidades-anticipadas" class="group bg-slate-800 border border-slate-700 rounded-2xl p-6 hover:border-emerald-500 transition-all duration-300 hover:-translate-y-1">
+                <div class="w-14 h-14 bg-emerald-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-500/20 transition-colors">
+                    <i class="bi bi-calendar2-week text-2xl text-emerald-500"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Anualidades Anticipadas</h3>
+                <p class="text-slate-400 text-sm mb-4">Calculo de valores para anualidades con anticipación (Rentas)</p>
+                <span class="inline-flex items-center gap-2 text-emerald-500 text-sm font-semibold">
+                    Abrir módulo <i class="bi bi-arrow-right"></i>
+                </span>
+            </a>
+
+            <div class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 opacity-60">
+                <div class="w-14 h-14 bg-slate-700/50 rounded-xl flex items-center justify-center mb-4">
+                    <i class="bi bi-clock-history text-2xl text-slate-500"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">Más módulos pronto</h3>
+                <p class="text-slate-500 text-sm">Interés, alicutas y más...</p>
+            </div>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-slate-800 text-center text-slate-500 text-sm">
+            <p class="flex items-center justify-center gap-2">
+                <i class="bi bi-code-slash"></i>
+                Desarrollado para la asignatura de Ingeniería Económica
+            </p>
+            <p class="mt-2">Stack: .NET 8 + Blazor Server + Tailwind CSS</p>
         </div>
     </div>
 </div>

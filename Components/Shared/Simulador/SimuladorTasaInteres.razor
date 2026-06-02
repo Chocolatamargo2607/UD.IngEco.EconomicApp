@@ -1,0 +1,40 @@
+@using EconomicApp.Models.DTOs
+
+<div class="card-dark m-3">
+    <h5 class="text-emerald-500 font-semibold mb-3 flex items-center gap-2 text-sm">
+        <i class="bi bi-percent"></i>
+        Tasa de Interés
+    </h5>
+    <div class="space-y-3">
+        <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Valor (%)</label>
+            <div class="flex w-full">
+                <InputNumber class="input-dark rounded-r-none !rounded-r-none text-xs flex-1 min-w-0" @bind-Value="Simulacion.ValorTasa" step="0.01" min="0" max="100" placeholder="18" />
+                <span class="bg-slate-800 border border-l-0 border-slate-700 rounded-r-lg px-2 py-2 text-xs text-slate-400 flex items-center">%</span>
+            </div>
+            <ValidationMessage For="@(() => Simulacion.ValorTasa)" class="text-red-500 text-xs" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Tipo</label>
+                <InputSelect class="select-dark text-xs" @bind-Value="Simulacion.TipoTasa">
+                    <option value="@TipoTasa.Efectiva">Efectiva</option>
+                    <option value="@TipoTasa.Nominal">Nominal</option>
+                </InputSelect>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Frecuencia</label>
+                <InputSelect class="select-dark text-xs" @bind-Value="Simulacion.FrecuenciaTasa">
+                    @foreach (var frecuencia in Enum.GetValues<Frecuencia>())
+                    {
+                        <option value="@frecuencia">@frecuencia.ToString()</option>
+                    }
+                </InputSelect>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public SimulacionRequestDto Simulacion { get; set; } = new();
+}

@@ -2,27 +2,43 @@
 @using System.Diagnostics
 
 <PageTitle>Error</PageTitle>
+<div class="min-h-[80vh] bg-slate-900 flex items-center justify-center p-4">
+    <div class="max-w-2xl w-full bg-slate-800 rounded-2xl border border-slate-700 p-6 sm:p-10 shadow-2xl animate-fadeIn">
+        <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="bi bi-exclamation-triangle text-2xl text-red-500"></i>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-white">Error del Sistema</h1>
+        </div>
+        
+        <h2 class="text-slate-300 text-base sm:text-lg mb-8">Ocurrió un error inesperado al procesar su solicitud.</h2>
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+        @if (ShowRequestId)
+        {
+            <div class="bg-slate-900/50 rounded-lg p-4 mb-8 border border-slate-700">
+                <p class="text-sm text-slate-400 break-all">
+                    <strong class="text-slate-300">ID de Solicitud:</strong> 
+                    <code class="text-red-400 bg-red-400/10 px-2 py-0.5 rounded ml-1">@RequestId</code>
+                </p>
+            </div>
+        }
 
-@if (ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@RequestId</code>
-    </p>
-}
-
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
+        <div class="space-y-4 border-l-2 border-slate-700 pl-4">
+            <h3 class="text-emerald-500 font-semibold uppercase tracking-wider text-xs">Modo de Desarrollo</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">
+                Cambiar al entorno <strong>Development</strong> mostrará información detallada sobre el error.
+                No debe habilitarse en producción ya que puede exponer información sensible de la aplicación.
+            </p>
+        </div>
+        
+        <div class="mt-10 flex flex-col sm:flex-row gap-4">
+            <a href="/" class="btn-emerald inline-flex items-center justify-center gap-2 py-3 px-6 text-center">
+                <i class="bi bi-house"></i>
+                Volver al Inicio
+            </a>
+        </div>
+    </div>
+</div>
 
 @code{
     [CascadingParameter]

@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  economicapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: economicapp
+    restart: unless-stopped
+    ports:
+      - "5050:5050"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5050
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5050/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - economic-network
+    volumes:
+      - app-logs:/app/logs
+
+volumes:
+  app-logs:
+
+networks:
+  economic-network:
+    driver: bridge

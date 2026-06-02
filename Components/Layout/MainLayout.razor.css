@@ -12,6 +12,12 @@
     border-right: 1px solid #334155;
     display: flex;
     flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
 }
 
 .sidebar-footer {
@@ -37,6 +43,8 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    margin-left: 280px;
+    transition: margin-left 0.3s ease;
 }
 
 .top-header {
@@ -82,4 +90,85 @@
 .page-wrapper {
     max-width: 1200px;
     margin: 0 auto;
+}
+
+/* Mobile Sidebar */
+.sidebar-wrapper.mobile-open {
+    left: 0;
+}
+
+.sidebar-close-btn {
+    display: none;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.25rem;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.hamburger-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: #10b981;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-right: 0.75rem;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+.overlay.active {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .sidebar-wrapper {
+        left: -280px;
+    }
+
+    .sidebar-wrapper.mobile-open {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .sidebar-close-btn {
+        display: block;
+    }
+
+    .hamburger-btn {
+        display: block;
+    }
+
+    .content-body {
+        padding: 1rem;
+    }
+
+    .page-wrapper {
+        padding: 0;
+    }
+
+    .top-header {
+        padding: 0 1rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .status-pill .label {
+        display: none;
+    }
 }

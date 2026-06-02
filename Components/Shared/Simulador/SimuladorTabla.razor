@@ -1,0 +1,155 @@
+@using EconomicApp.Models.DTOs
+@using System.Globalization
+
+<div class="bg-slate-800 rounded-xl p-4 sm:p-6 border border-slate-700/50">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h5 class="text-emerald-500 font-semibold flex items-center gap-2">
+            <i class="bi bi-table"></i>
+            Tabla de Amortización
+        </h5>
+        <div class="flex gap-2 w-full sm:w-auto">
+            <button class="bg-emerald-500 text-slate-900 px-2.5 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-400 transition-colors flex items-center gap-1.5 flex-1 sm:flex-none justify-center min-w-[80px]"
+                @onclick="() => OnExport.InvokeAsync(FormatoExportacion.Excel)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-spreadsheet" viewBox="0 0 16 16">
+                    <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V9H3V2a1 1 0 0 1 1-1h5.5zM3 12v-2h2v2zm0 1h2v2H4a1 1 0 0 1-1-1zm3 2v-2h3v2zm4 0v-2h3v1a1 1 0 0 1-1 1zm3-3h-3v-2h3zm-7 0v-2h3v2z" />
+                </svg>
+                <span class="text-xs">Excel</span>
+            </button>
+            <button class="bg-red-500 text-white px-2.5 py-2 rounded-lg text-sm font-semibold hover:bg-red-400 transition-colors flex items-center gap-1.5 flex-1 sm:flex-none justify-center min-w-[80px]"
+                @onclick="() => OnExport.InvokeAsync(FormatoExportacion.PDF)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filetype-pdf" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM1.6 11.85H0v3.999h.791v-1.342h.803q.43 0 .732-.173.305-.175.463-.474a1.4 1.4 0 0 0 .161-.677q0-.375-.158-.677a1.2 1.2 0 0 0-.46-.477q-.3-.18-.732-.179m.545 1.333a.8.8 0 0 1-.085.38.57.57 0 0 1-.238.241.8.8 0 0 1-.375.082H.788V12.48h.66q.327 0 .512.181.185.183.185.522m1.217-1.333v3.999h1.46q.602 0 .998-.237a1.45 1.45 0 0 0 .595-.689q.196-.45.196-1.084 0-.63-.196-1.075a1.43 1.43 0 0 0-.589-.68q-.396-.234-1.005-.234zm.791.645h.563q.371 0 .609.152a.9.9 0 0 1 .354.454q.118.302.118.753a2.3 2.3 0 0 1-.068.592 1.1 1.1 0 0 1-.196.422.8.8 0 0 1-.334.252 1.3 1.3 0 0 1-.483.082h-.563zm3.743 1.763v1.591h-.79V11.85h2.548v.653H7.896v1.117h1.606v.638z" />
+                </svg>
+                <span class="text-xs">PDF</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto -mx-4 sm:mx-0 custom-scrollbar">
+        <table class="w-full min-w-[600px]">
+            <thead>
+                <tr class="border-b border-slate-700">
+                    <th class="text-center py-3 px-2 sm:px-4 text-emerald-500 text-xs uppercase tracking-wider font-semibold">Periodo</th>
+                    <th class="text-right py-3 px-2 sm:px-4 text-emerald-500 text-xs uppercase tracking-wider font-semibold">Saldo</th>
+                    <th class="text-right py-3 px-2 sm:px-4 text-emerald-500 text-xs uppercase tracking-wider font-semibold">Interés</th>
+                    <th class="text-right py-3 px-2 sm:px-4 text-emerald-500 text-xs uppercase tracking-wider font-semibold">Cuota</th>
+                    <th class="text-right py-3 px-2 sm:px-4 text-emerald-500 text-xs uppercase tracking-wider font-semibold">Amortización</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var cuota in Cuotas)
+                {
+                    var esUltimaFila = cuota == Cuotas.Last();
+                    <tr class="border-b border-slate-700/30 hover:bg-emerald-500/5 transition-colors cursor-pointer
+                        @(PeriodoSeleccionado == cuota.NumeroPeriodo ? "bg-blue-500/20" : "")
+                        @(cuota.NumeroPeriodo == 0 ? "bg-emerald-500/5" : "")
+                        @(esUltimaFila ? "bg-red-500/10" : "")"
+                        @onclick="() => SeleccionarPeriodo(cuota)">
+                        <td class="py-3 px-2 sm:px-4 text-center font-bold text-sm">@cuota.NumeroPeriodo</td>
+                        <td class="py-3 px-2 sm:px-4 text-right text-sm text-slate-300">@Formatear(ObtenerSaldo(cuota))</td>
+                        <td class="py-3 px-2 sm:px-4 text-right text-sm text-slate-300">@Formatear(cuota.Interes)</td>
+                        <td class="py-3 px-2 sm:px-4 text-right font-bold text-emerald-500 text-sm">@Formatear(cuota.ValorCuotaMostrado)</td>
+                        <td class="py-3 px-2 sm:px-4 text-right text-sm text-slate-300">@Formatear(cuota.AbonoCapitalMostrado)</td>
+                    </tr>
+                }                
+            </tbody>
+        </table>
+        @if (CuotaSeleccionada != null){ 
+            <div class="mt-6 bg-slate-900 rounded-xl p-4 border border-slate-700">
+                <h6 class="text-emerald-400 font-bold mb-4">
+                    Recalcular desde período @CuotaSeleccionada.NumeroPeriodo
+                </h6>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    @if (TipoRecalculoSeleccionado != TipoRecalculo.RecalcularCuota){
+                        <div>
+                            <label class="text-sm text-slate-400">Valor abono</label>
+                            <input type="number"
+                                class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white"
+                                @bind="ValorAbono" />
+                        </div>
+                    }
+                    <div>
+                        <label class="text-sm text-slate-400">Tipo</label>
+                        <select class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white"
+                                @bind="TipoRecalculoSeleccionado">
+                            <option value="@TipoRecalculo.AbonarCapital">
+                                Mantener cuota y reducir plazo
+                            </option>
+                            <option value="@TipoRecalculo.RecalcularCuota">
+                                Mantener plazo y reducir cuota
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-end">
+                        <button class="w-full btn-emerald text-white font-bold py-3 rounded-lg"
+                                @onclick="AplicarAbono">
+                            Aplicar
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        }
+        @if (MensajeError != null){
+            <div class="mt-2 text-red-400 text-sm flex items-center gap-1">
+                <i class="bi bi-exclamation-circle"></i>
+                @MensajeError
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public List<CuotaDto> Cuotas { get; set; } = new();
+    [Parameter] public EventCallback<FormatoExportacion> OnExport { get; set; }
+    [Parameter] public EventCallback<RecalculoRequestDto> OnRecalcular { get; set; }
+
+    private decimal ObtenerSaldo(CuotaDto cuota)
+    {
+        return cuota.SaldoFinal;
+    }
+
+    private string Formatear(decimal valor)
+    {
+        return valor.ToString("N2", CultureInfo.CreateSpecificCulture("es-CO"));
+    }
+    private CuotaDto? CuotaSeleccionada;
+    private int? PeriodoSeleccionado;
+    private decimal ValorAbono;
+    private TipoRecalculo TipoRecalculoSeleccionado;
+    private string? MensajeError;
+    
+    private void SeleccionarPeriodo(CuotaDto cuota)
+    {
+        if (cuota.NumeroPeriodo == 0)
+            return;
+
+        CuotaSeleccionada = cuota;
+        PeriodoSeleccionado = cuota.NumeroPeriodo;
+    }
+    private async Task AplicarAbono(){
+        if (CuotaSeleccionada == null)
+            return;
+
+        if (TipoRecalculoSeleccionado == TipoRecalculo.AbonarCapital){
+            if (ValorAbono <= 0) {
+                MensajeError = "El abono debe ser mayor a cero";
+                return;
+            }
+            if (ValorAbono > CuotaSeleccionada.SaldoFinal) {
+                MensajeError = $"El abono no puede superar el saldo de {Formatear(CuotaSeleccionada.SaldoFinal)}";
+                return;
+            }
+        }
+        MensajeError = null;
+
+        await OnRecalcular.InvokeAsync(new RecalculoRequestDto
+        {
+            Periodo = CuotaSeleccionada.NumeroPeriodo,
+            ValorAbono = TipoRecalculoSeleccionado == TipoRecalculo.RecalcularCuota ? 0 : ValorAbono,
+            Tipo = TipoRecalculoSeleccionado
+        });
+    }
+    }

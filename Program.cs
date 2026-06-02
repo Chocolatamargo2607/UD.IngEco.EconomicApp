@@ -1,10 +1,18 @@
 using EconomicApp.Components;
+using EconomicApp.Components.Services;
+using EconomicApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddControllers();
+builder.Services.AddScoped<ITasaService, ServicioConversorTasas>();
+builder.Services.AddScoped<IAmortizacionService, ServicioAmortizacion>();
+builder.Services.AddScoped<IReporteService, ServicioReportes>();
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<SimuladorApiClient>();
 
 var app = builder.Build();
 
@@ -23,5 +31,7 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapControllers();
 
 app.Run();

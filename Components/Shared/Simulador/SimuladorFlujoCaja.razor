@@ -1,0 +1,113 @@
+@using EconomicApp.Models.DTOs
+@using System.Globalization
+
+@if (Cuotas != null && Cuotas.Any())
+{
+    <div class="card-dark p-4 rounded-lg">
+        <h5 class="text-emerald-500 font-semibold mb-6 flex items-center gap-2">
+            <i class="bi bi-graph-down"></i>
+            Diagrama de Flujo de Caja
+        </h5>
+
+        <div class="relative overflow-x-auto w-full custom-scrollbar pb-4">
+            
+            <div class="mt-8 mb-8 px-4" style="min-width: @(Math.Max(600, Cuotas.Count * 60))px;">
+                
+                <div class="relative w-full" style="height: 320px;">
+                    @{
+                        decimal maxAbs = ObtenerMaxAbsoluto();
+                        if (maxAbs == 0) maxAbs = 1;
+                        int maxHeightPx = 110;
+                    }
+
+                    <div class="absolute left-0 right-0 top-1/2 border-t-2 border-slate-600 z-0"></div>
+
+                    @foreach (var cuota in Cuotas)
+                    {
+                        string leftPos = ObtenerPosicionX(cuota.NumeroPeriodo);
+                        
+                        @if (cuota.NumeroPeriodo == 0)
+                        {
+                            int h = (int)((cuota.SaldoFinal / maxAbs) * maxHeightPx);
+                            if (h < 5) h = 5;
+
+                            <div class="absolute flex flex-col items-center justify-end z-10"
+                                 style="left: @leftPos%; bottom: 50%; transform: translateX(-50%); height: @(h + 40)px;">
+                                <div class="text-xs text-emerald-400 mb-1 whitespace-nowrap font-medium" title="@FormatearMonto(cuota.SaldoFinal)">
+                                    @FormatearMonto(cuota.SaldoFinal)
+                                </div>
+                                <div class="w-3 sm:w-4 bg-emerald-500 rounded-t-sm shadow-[0_0_8px_rgba(16,185,129,0.5)]" style="height: @(h)px;"></div>
+                            </div>
+                            
+                            <div class="absolute text-xs font-bold text-slate-300 z-10" style="left: @leftPos%; top: calc(50% + 12px); transform: translateX(-50%);">
+                                0
+                            </div>
+                        }
+                        else
+                        {
+                            int h = (int)((cuota.ValorCuota / maxAbs) * maxHeightPx);
+                            if (h < 5) h = 5;
+
+                            <div class="absolute flex flex-col items-center justify-start z-10"
+                                 style="left: @leftPos%; top: 50%; transform: translateX(-50%); height: @(h + 40)px;">
+                                <div class="w-3 sm:w-4 bg-red-500 rounded-b-sm shadow-[0_0_8px_rgba(239,68,68,0.5)]" style="height: @(h)px;"></div>
+                                <div class="text-xs text-red-400 mt-1 whitespace-nowrap font-medium" title="@FormatearMonto(cuota.ValorCuota)">
+                                    @FormatearMonto(cuota.ValorCuota)
+                                </div>
+                            </div>
+
+                            <div class="absolute text-xs font-bold text-slate-300 z-10" style="left: @leftPos%; bottom: calc(50% + 12px); transform: translateX(-50%);">
+                                @cuota.NumeroPeriodo
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="flex items-center gap-6 mt-6 text-sm justify-center border-t border-slate-700 pt-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-emerald-500 rounded-sm shadow-[0_0_5px_rgba(16,185,129,0.8)]"></div>
+                    <span class="text-slate-400">Desembolso (Ingreso)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-red-500 rounded-sm shadow-[0_0_5px_rgba(239,68,68,0.8)]"></div>
+                    <span class="text-slate-400">Cuotas (Egreso)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public List<CuotaDto> Cuotas { get; set; } = new();
+    [Parameter] public decimal MontoPrestamo { get; set; }
+
+    private string FormatearMonto(decimal monto)
+    {
+        return monto.ToString("C0", CultureInfo.CreateSpecificCulture("es-CO"));
+    }
+
+    private decimal ObtenerMaxAbsoluto()
+    {
+        if (Cuotas == null || !Cuotas.Any()) return 0;
+        decimal max = Cuotas.FirstOrDefault(x => x.NumeroPeriodo == 0)?.SaldoFinal ?? MontoPrestamo;
+        foreach (var c in Cuotas.Where(x => x.NumeroPeriodo > 0))
+        {
+            if (c.ValorCuota > max) max = c.ValorCuota;
+        }
+        return max;
+    }
+
+    private string ObtenerPosicionX(int periodo)
+    {
+        if (Cuotas == null || !Cuotas.Any()) return "50";
+        int total = Cuotas.Count;
+        if (total <= 1) return "50";
+        
+        // SOLUCIÓN 2: Evitar que choque con los bordes
+        // En lugar de ir del 0% al 100%, comprimimos el gráfico para que vaya del 5% al 95%.
+        // Esto le da un "padding" natural a las puntas para que el texto de las esquinas no se desborde.
+        decimal porcentaje = 5m + ((decimal)periodo / (total - 1)) * 90m;
+        return porcentaje.ToString("F2", CultureInfo.InvariantCulture);
+    }
+}

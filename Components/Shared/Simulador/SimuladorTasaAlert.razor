@@ -1,0 +1,16 @@
+@using EconomicApp.Models.DTOs
+
+@if (ConversionTasa != null)
+{
+    <div class="alert-success mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-4 rounded-xl border border-emerald-500/20" role="alert">
+        <i class="bi bi-check-circle-fill text-xl flex-shrink-0"></i>
+        <div class="flex-1">
+            <div class="font-bold text-base">Tasa Efectiva Periódica: @((ConversionTasa.TasaEfectivaPeriodica * 100).ToString("F4"))%</div>
+            <p class="text-sm opacity-90 leading-snug mt-1 sm:mt-0">@ConversionTasa.Mensaje</p>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public ConversionTasaResponseDto? ConversionTasa { get; set; }
+}

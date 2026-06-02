@@ -1,20 +1,31 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page-container">
-    <aside class="sidebar-wrapper">
-        <NavMenu />
+    <CascadingValue Value="isSidebarOpen">
+        <CascadingValue Value="ToggleSidebar">
+            <aside class="sidebar-wrapper @(isSidebarOpen ? "mobile-open" : "")">
+                <button class="sidebar-close-btn" @onclick="ToggleSidebar">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <NavMenu />
+                <div class="sidebar-footer">
+                    <div class="version-tag">
+                        <i class="bi bi-info-circle"></i>
+                        <span>v 1.1.0 - Ing. Económica</span>
+                    </div>
+                </div>
+            </aside>
 
-        <div class="sidebar-footer">
-            <div class="version-tag">
-                <i class="bi bi-info-circle"></i>
-                <span>v 1.0.0 - Ing. Económica</span>
-            </div>
-        </div>
-    </aside>
+            <div class="overlay @(isSidebarOpen ? "active" : "")" @onclick="ToggleSidebar"></div>
+        </CascadingValue>
+    </CascadingValue>
 
     <main class="main-content">
         <header class="top-header">
             <div class="header-left">
+                <button class="hamburger-btn" @onclick="ToggleSidebar">
+                    <i class="bi bi-list"></i>
+                </button>
                 <div class="status-pill">
                     <span class="dot"></span>
                     <span class="label">Entorno de Desarrollo</span>
@@ -29,3 +40,8 @@
         </section>
     </main>
 </div>
+
+@code {
+    private bool isSidebarOpen = false;
+    private void ToggleSidebar() => isSidebarOpen = !isSidebarOpen;
+}

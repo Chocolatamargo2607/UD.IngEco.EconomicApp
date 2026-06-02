@@ -1,0 +1,444 @@
+﻿@page "/interes-compuesto"
+@using System.Globalization
+@rendermode InteractiveServer
+
+<!-- Encabezado -->
+<div class="mb-6">
+    <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-white flex items-center gap-2 mb-2">
+        <i class="bi bi-calculator text-emerald-500"></i>
+        Módulo de Interés Compuesto
+    </h2>
+    <p class="text-slate-400 text-xs sm:text-sm">Calcula el crecimiento del dinero a través de la capitalización periódica.</p>
+</div>
+
+<!-- Panel de control de objetivos de cálculo -->
+<div class="sub-nav mb-4">
+    <button class="nav-btn @(calcularModo == "S" ? "active" : "")" @onclick='() => SeleccionarModo("S")'>
+        Calcular Valor Futuro (S)
+    </button>
+    <button class="nav-btn @(calcularModo == "P" ? "active" : "")" @onclick='() => SeleccionarModo("P")'>
+        Calcular Valor Presente (P)
+    </button>
+    <button class="nav-btn @(calcularModo == "I" ? "active" : "")" @onclick='() => SeleccionarModo("I")'>
+        Calcular Tasa de Interés (i)
+    </button>
+    <button class="nav-btn @(calcularModo == "N" ? "active" : "")" @onclick='() => SeleccionarModo("N")'>
+        Calcular Periodos (n)
+    </button>
+</div>
+
+<div class="row">
+    <!-- Panel Izquierdo: Inputs y Fórmulas -->
+    <div class="col-lg-5">
+        <div class="content-card mb-4">
+            <h4 class="mb-4 text-white"><i class="bi bi-input-cursor-text me-2"></i>Variables de Entrada</h4>
+
+            @if (calcularModo != "P")
+            {
+                <div class="form-group mb-3">
+                    <label class="text-muted small fw-bold">VALOR PRESENTE / CAPITAL INICIAL (P)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-emerald">$</span>
+                        <input type="number" class="form-control" @bind="valorP" @bind:event="oninput" @onkeyup="Calcular" />
+                    </div>
+                </div>
+            }
+
+            @if (calcularModo != "S")
+            {
+                <div class="form-group mb-3">
+                    <label class="text-muted small fw-bold">VALOR FUTURO / MONTO FINAL (S)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-emerald">$</span>
+                        <input type="number" class="form-control" @bind="valorF" @bind:event="oninput" @onkeyup="Calcular" />
+                    </div>
+                </div>
+            }
+
+            <!-- Selector del Tipo de Tasa (Nominal vs Efectiva) -->
+            @if (calcularModo != "I")
+            {
+                <div class="form-group mb-3">
+                    <label class="text-muted small fw-bold">TIPO DE TASA DE ENTRADA</label>
+                    <select class="form-select" @bind="tipoTasa" @bind:after="Calcular">
+                        <option value="Efectiva">Efectiva Periódica (i)</option>
+                        <option value="Nominal">Nominal Anual (J)</option>
+                    </select>
+                </div>
+            }
+
+            <!-- Selector de Tipo de Período -->
+            <div class="form-group mb-3">
+                <label class="text-muted small fw-bold">TIPO DE PERÍODO (CAPITALIZACIÓN)</label>
+                <select class="form-select" @bind="tipoPeriodo" @bind:after="Calcular">
+                    <option value="Meses">Meses (Mensual)</option>
+                    <option value="Bimestres">Bimestres (Bimestral)</option>
+                    <option value="Trimestres">Trimestres (Trimestral)</option>
+                    <option value="Semestres">Semestres (Semestral)</option>
+                    <option value="Años">Años (Anual)</option>
+                </select>
+            </div>
+
+            @if (calcularModo != "I")
+            {
+                <div class="form-group mb-3">
+                    <label class="text-muted small fw-bold">
+                        @if (tipoTasa == "Nominal")
+                        {
+                            <span>TASA NOMINAL ANUAL % (J)</span>
+                        }
+                        else
+                        {
+                            <span>TASA DE INTERÉS PERIÓDICA % (i) @ObtenerAdjetivoTasa()</span>
+                        }
+                    </label>
+                    <div class="input-group">
+                        <input type="number" step="0.01" class="form-control" @bind="tasaI" @bind:event="oninput" @onkeyup="Calcular" placeholder="Ej: 24" />
+                        <span class="input-group-text bg-dark border-secondary text-muted">%</span>
+                    </div>
+
+                    @if (tipoTasa == "Nominal")
+                    {
+                        <small class="text-emerald mt-1 d-block font-monospace">
+                            Se convertirá a tasa efectiva periódica: i = J / @ObtenerFrecuenciaM() = @TasaEfectivaCalculada.ToString("N4")% @ObtenerAdjetivoTasa().ToLower()
+                        </small>
+                    }
+                    else
+                    {
+                        <small class="text-slate-400 mt-1 d-block">Tasa efectiva aplicada por cada @ObtenerNombrePeriodoSolo().ToLower().</small>
+                    }
+                </div>
+            }
+
+            @if (calcularModo != "N")
+            {
+                <div class="form-group mb-3">
+                    <label class="text-muted small fw-bold">TIEMPO / NÚMERO DE @tipoPeriodo.ToUpper() (n)</label>
+                    <input type="number" class="form-control" @bind="periodosN" @bind:event="oninput" @onkeyup="Calcular" placeholder="Ej: 12" />
+                </div>
+            }
+        </div>
+
+        <!-- Panel de Fórmulas Dinámicas -->
+        <div class="content-card formula-display mb-4">
+            <h5 class="text-emerald mb-3 text-center border-bottom border-secondary pb-2">
+                <i class="bi bi-function me-2"></i>Ecuación de Despeje
+            </h5>
+            <div class="math-container">
+                @if (calcularModo == "S")
+                {
+                    <div class="math-label text-muted">Fórmula del Valor Futuro:</div>
+                    <div class="math-formula mb-3">
+                        <span class="var">S</span> = <span class="var">P</span> × (1 + <span class="var">i</span>)<sup><span class="var">n</span></sup>
+                    </div>
+                }
+                else if (calcularModo == "P")
+                {
+                    <div class="math-label text-muted">Fórmula del Valor Presente:</div>
+                    <div class="math-formula mb-3">
+                        <span class="var">P</span> =
+                        <div class="fraction">
+                            <span class="num">S</span>
+                            <span class="den">(1 + i)<sup>n</sup></span>
+                        </div>
+                    </div>
+                }
+                else if (calcularModo == "I")
+                {
+                    <div class="math-label text-muted">Fórmula de la Tasa de Interés:</div>
+                    <div class="math-formula mb-3">
+                        <span class="var">i</span> =
+                        <div class="fraction-parenthesis">
+                            <div class="fraction">
+                                <span class="num">S</span>
+                                <span class="den">P</span>
+                            </div>
+                        </div>
+                        <sup>
+                            <div class="fraction smaller">
+                                <span class="num">1</span>
+                                <span class="den">n</span>
+                            </div>
+                        </sup> - 1
+                    </div>
+                }
+                else if (calcularModo == "N")
+                {
+                    <div class="math-label text-muted">Fórmula del Tiempo / Periodos:</div>
+                    <div class="math-formula mb-3">
+                        <span class="var">n</span> =
+                        <div class="fraction">
+                            <span class="num">ln(S / P)</span>
+                            <span class="den">ln(1 + i)</span>
+                        </div>
+                    </div>
+                }
+
+                @if (tipoTasa == "Nominal" && calcularModo != "I")
+                {
+                    <hr class="w-100 border-secondary my-3" />
+                    <div class="math-label text-muted">Conversión de Tasa Nominal a Efectiva:</div>
+                    <div class="math-formula">
+                        <span class="var">i</span> =
+                        <div class="fraction">
+                            <span class="num">J</span>
+                            <span class="den">m</span>
+                        </div>
+                        =
+                        <div class="fraction">
+                            <span class="num">@tasaI%</span>
+                            <span class="den">@ObtenerFrecuenciaM()</span>
+                        </div>
+                        = <span class="var">@TasaEfectivaCalculada.ToString("N4")%</span>
+                    </div>
+                    <small class="text-slate-400 mt-2 text-center text-[10px]">Donde m es la frecuencia de capitalización anual.</small>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel Derecho: Resultados y Tabla -->
+    <div class="col-lg-7">
+        <div class="content-card h-100">
+            <h4 class="mb-4 text-white"><i class="bi bi-graph-up-arrow me-2"></i>Análisis del Rendimiento</h4>
+
+            @if (resultadoCalculado > 0 || (calcularModo == "I" && resultadoCalculado != 0))
+            {
+                <div class="result-highlight-box mb-4 text-center">
+                    <span class="text-muted d-block small mb-2">RESULTADO DEL DESPEJE:</span>
+                    @if (calcularModo == "S")
+                    {
+                        <h2 class="text-emerald fw-bold">@resultadoCalculado.ToString("C0", cultureCOP)</h2>
+                        <p class="text-muted mb-0">Monto total acumulado al final de los @Math.Round(periodosN, 2) @tipoPeriodo.ToLower().</p>
+                    }
+                    else if (calcularModo == "P")
+                    {
+                        <h2 class="text-emerald fw-bold">@resultadoCalculado.ToString("C0", cultureCOP)</h2>
+                        <p class="text-muted mb-0">Inversión inicial requerida.</p>
+                    }
+                    else if (calcularModo == "I")
+                    {
+                        <h2 class="text-emerald fw-bold">@((resultadoCalculado * 100).ToString("N4"))% @ObtenerAdjetivoTasa()</h2>
+                        <p class="text-muted mb-0">Tasa de interés periódica efectiva necesaria.</p>
+                        <div class="mt-3 p-2 bg-dark rounded border border-slate-800">
+                            <span class="text-slate-400 d-block small">Tasa Nominal Anual Equivalente (J):</span>
+                            <span class="text-emerald font-monospace font-bold">@((resultadoCalculado * 100 * ObtenerFrecuenciaM()).ToString("N4"))% C.V.@ObtenerSufijoNominal()</span>
+                        </div>
+                    }
+                    else if (calcularModo == "N")
+                    {
+                        <h2 class="text-emerald fw-bold">@resultadoCalculado.ToString("N2") @ObtenerNombrePeriodoSolo()s</h2>
+                        <p class="text-muted mb-0">Tiempo de maduración estimado de la transacción financiera.</p>
+                    }
+                </div>
+
+                @if (calcularModo == "S" || calcularModo == "P")
+                {
+                    <!-- Tabla de capitalización periódica -->
+                    <h5 class="text-white mb-3"><i class="bi bi-table me-2"></i>Tabla de Capitalización por @tipoPeriodo</h5>
+                    <div class="table-responsive capital-table-container">
+                        <table class="table table-dark custom-table">
+                            <thead>
+                                <tr>
+                                    <th class="ps-3">@ObtenerNombrePeriodoSolo() (n)</th>
+                                    <th class="text-end">Saldo Inicial</th>
+                                    <th class="text-end">Interés Generado</th>
+                                    <th class="text-end pe-3">Saldo Final (Acumulado)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    double saldoInicial = calcularModo == "S" ? valorP : resultadoCalculado;
+                                    double tasaDecimal = TasaEfectivaCalculada / 100;
+                                    int limitePeriodos = (int)Math.Min(Math.Ceiling(periodosN), 120);
+                                }
+                                @for (int p = 1; p <= limitePeriodos; p++)
+                                {
+                                    double interesPeriodo = saldoInicial * tasaDecimal;
+                                    double saldoFinal = saldoInicial + interesPeriodo;
+                                    <tr>
+                                        <td class="ps-3 text-muted">@ObtenerNombrePeriodoSolo() @p</td>
+                                        <td class="text-end">@saldoInicial.ToString("C0", cultureCOP)</td>
+                                        <td class="text-end text-emerald-dim">+ @interesPeriodo.ToString("C0", cultureCOP)</td>
+                                        <td class="text-end pe-3 fw-bold text-emerald">@saldoFinal.ToString("C0", cultureCOP)</td>
+                                    </tr>
+                                    saldoInicial = saldoFinal;
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    @if (periodosN > 120)
+                    {
+                        <small class="text-slate-500 d-block mt-2 text-center">* Mostrando los primeros 120 periodos por optimización de visualización.</small>
+                    }
+                }
+            }
+            else
+            {
+                <div class="empty-state">
+                    <div class="empty-icon-circle">
+                        <i class="bi bi-percent"></i>
+                    </div>
+                    <h5 class="text-white">Ingrese los datos correspondientes</h5>
+                    <p>Complete los campos vacíos en el panel izquierdo para automatizar el cálculo e iniciar la proyección de tasas e intereses.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private string calcularModo = "S";
+    private string tipoPeriodo = "Meses";
+    private string tipoTasa = "Efectiva"; // Efectiva o Nominal
+    private CultureInfo cultureCOP = new CultureInfo("es-CO");
+
+    // Variables de Cálculo
+    private double valorP = 0;      // Capital inicial por defecto 
+    private double valorF = 0;
+    private double tasaI = 0;           // Tasa por defecto
+    private double periodosN = 0;         // Periodos por defecto
+    private double resultadoCalculado = 0;
+
+    // Propiedad calculada para obtener la tasa efectiva periódica real a aplicar
+    private double TasaEfectivaCalculada
+    {
+        get
+        {
+            if (calcularModo == "I") return resultadoCalculado * 100;
+            if (tipoTasa == "Nominal")
+            {
+                double m = ObtenerFrecuenciaM();
+                return m > 0 ? tasaI / m : tasaI;
+            }
+            return tasaI;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        Calcular();
+    }
+
+    private void SeleccionarModo(string modo)
+    {
+        calcularModo = modo;
+        resultadoCalculado = 0;
+
+        // Reset variables dependientes del modo
+        if (modo == "S") { valorF = 0; }
+        else if (modo == "P") { valorP = 0; }
+        else if (modo == "I") { tasaI = 0; }
+        else if (modo == "N") { periodosN = 0; }
+
+        Calcular();
+    }
+
+    private double ObtenerFrecuenciaM()
+    {
+        return tipoPeriodo switch
+        {
+            "Meses" => 12,        // 12 meses al año
+            "Bimestres" => 6,      // 6 bimestres al año
+            "Trimestres" => 4,     // 4 trimestres al año
+            "Semestres" => 2,      // 2 semestres al año
+            "Años" => 1,           // 1 año al año
+            _ => 1
+        };
+    }
+
+    private string ObtenerAdjetivoTasa()
+    {
+        return tipoPeriodo switch
+        {
+            "Meses" => "Mensual",
+            "Bimestres" => "Bimestral",
+            "Trimestres" => "Trimestral",
+            "Semestres" => "Semestral",
+            "Años" => "Anual",
+            _ => "Periódica"
+        };
+    }
+
+    private string ObtenerNombrePeriodoSolo()
+    {
+        return tipoPeriodo switch
+        {
+            "Meses" => "Mes",
+            "Bimestres" => "Bimestre",
+            "Trimestres" => "Trimestre",
+            "Semestres" => "Semestre",
+            "Años" => "Año",
+            _ => "Periodo"
+        };
+    }
+
+    private string ObtenerSufijoNominal()
+    {
+        return tipoPeriodo switch
+        {
+            "Meses" => "M (Mensual)",
+            "Bimestres" => "B (Bimestral)",
+            "Trimestres" => "T (Trimestral)",
+            "Semestres" => "S (Semestral)",
+            "Años" => "A (Anual)",
+            _ => "P"
+        };
+    }
+
+    private void Calcular()
+    {
+        try
+        {
+            // Forzar redondeo en entradas que provienen de cálculos anteriores para evitar desbordamientos de precisión de punto flotante en la UI
+            valorP = Math.Round(valorP, 2);
+            valorF = Math.Round(valorF, 2);
+            tasaI = Math.Round(tasaI, 4);
+            periodosN = Math.Round(periodosN, 2);
+
+            // Obtener la tasa de interés efectiva en decimales periódicos
+            double iDecimal = TasaEfectivaCalculada / 100;
+
+            if (calcularModo == "S")
+            {
+                if (valorP > 0 && TasaEfectivaCalculada >= 0 && periodosN > 0)
+                {
+                    resultadoCalculado = valorP * Math.Pow(1 + iDecimal, periodosN);
+                    valorF = Math.Round(resultadoCalculado, 2);
+                }
+            }
+            else if (calcularModo == "P")
+            {
+                if (valorF > 0 && TasaEfectivaCalculada >= 0 && periodosN > 0)
+                {
+                    resultadoCalculado = valorF / Math.Pow(1 + iDecimal, periodosN);
+                    valorP = Math.Round(resultadoCalculado, 2);
+                }
+            }
+            else if (calcularModo == "I")
+            {
+                if (valorF > 0 && valorP > 0 && periodosN > 0)
+                {
+                    // resultadoCalculado es la tasa efectiva periódica en decimales
+                    resultadoCalculado = Math.Pow(valorF / valorP, 1.0 / periodosN) - 1;
+                    tasaI = Math.Round(resultadoCalculado * 100, 4);
+                }
+            }
+            else if (calcularModo == "N")
+            {
+                if (valorF > 0 && valorP > 0 && TasaEfectivaCalculada > 0)
+                {
+                    resultadoCalculado = Math.Log(valorF / valorP) / Math.Log(1 + iDecimal);
+                    periodosN = Math.Round(resultadoCalculado, 2);
+                }
+            }
+        }
+        catch
+        {
+            resultadoCalculado = 0;
+        }
+    }
+
+
+}

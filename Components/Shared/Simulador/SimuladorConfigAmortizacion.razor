@@ -1,0 +1,42 @@
+@using EconomicApp.Models.DTOs
+
+<div class="card-dark m-3">
+    <h5 class="text-emerald-500 font-semibold mb-3 flex items-center gap-2 text-sm">
+        <i class="bi bi-gear"></i>
+        Amortización
+    </h5>
+    <div class="space-y-3">
+        <div>
+            <label class="block text-xs font-medium text-slate-400 mb-2">Sistema</label>
+            <div class="flex flex-wrap gap-3">
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="radio" name="sistema" class="w-3.5 h-3.5 accent-emerald-500" 
+                        checked="@(Amortizacion.SistemaAmortizacion == SistemaAmortizacion.Frances)"
+                        @onclick="@(() => Amortizacion.SistemaAmortizacion = SistemaAmortizacion.Frances)" />
+                    <span class="text-white text-xs flex items-center gap-1">
+                        <i class="bi bi-calendar-check text-emerald-500"></i>
+                        Francés
+                    </span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="radio" name="sistema" class="w-3.5 h-3.5 accent-emerald-500"
+                        checked="@(Amortizacion.SistemaAmortizacion == SistemaAmortizacion.Aleman)"
+                        @onclick="@(() => Amortizacion.SistemaAmortizacion = SistemaAmortizacion.Aleman)" />
+                    <span class="text-white text-xs flex items-center gap-1">
+                        <i class="bi bi-cash-stack text-emerald-500"></i>
+                        Alemán
+                    </span>
+                </label>
+            </div>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Periodos de Gracia (g)</label>
+            <InputNumber class="input-dark text-xs" @bind-Value="Amortizacion.PeriodosGracia" min="0" max="60" placeholder="0" />
+            <ValidationMessage For="@(() => Amortizacion.PeriodosGracia)" class="text-red-500 text-xs" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public AmortizacionRequestDto Amortizacion { get; set; } = new();
+}
